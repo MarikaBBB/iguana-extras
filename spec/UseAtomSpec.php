@@ -14,13 +14,18 @@ describe('UseAtom', function() {
         \WP_Mock::tearDown();
     });
 
-    it('should register actions correctly', function() {
-        // expect($this->UseAtom)->toBeAnInstanceOf(\Dxw\Iguana\Registerable::class);
-        \WP_Mock::expectActionAdded('init', [$this->useAtom, 'init']);
-        \WP_Mock::expectActionAdded('wp_head', [$this->useAtom, 'wpHead']);
+    describe("::register()", function() {
+        it('should register actions correctly', function() {
+            // expect($this->UseAtom)->toBeAnInstanceOf(\Dxw\Iguana\Registerable::class);
+            \WP_Mock::expectActionAdded('init', [$this->useAtom, 'init']);
+            \WP_Mock::expectActionAdded('wp_head', [$this->useAtom, 'wpHead']);
+    
+            $this->useAtom->register();
+            
+        });
 
-        $this->useAtom->register();
-        
     });
-});
 
+
+    
+});
