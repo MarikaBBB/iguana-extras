@@ -2,64 +2,82 @@
 
 use Dxw\Iguana\Extras\UseAtom;
 
-describe('UseAtom', function() {
-    // initialisation
-    beforeEach(function () {
-        $this->useAtom = new \Dxw\Iguana\Extras\UseAtom();
-        \WP_Mock::setUp();
-    });
+describe('UseAtom', function () {
+	// initialisation
+	beforeEach(function () {
+		$this->useAtom = new \Dxw\Iguana\Extras\UseAtom();
 
-    afterEach(function() {
-        \WP_Mock::tearDown();
-    });
+        allow('add_filter')->toBeCalled();
+        allow('remove_action')->toBeCalled();
+        allow('add_action')->toBeCalled();
+	});
 
-    describe("::register()", function() {
-        it('should register actions correctly', function() {
-            allow('add_action')->tobeCalled()->with('init', [$this->useAtom, 'init']);
-            allow('add_action')->tobeCalled()->with('wp_head', [$this->useAtom, 'wpHead']);
+	afterEach(function () {
+        unset($this->useAtom);
+	});
 
-    
-            
-            $this->useAtom->register();           
-        });
-    });
+	describe("::register()", function () {
+		it('should register actions correctly', function () {
+			allow('add_action')->toBeCalled();
+			expect('add_action')->toBeCalled()->times(2);
+			expect('add_action')->toBeCalled()->once()->with('init', [$this->useAtom, 'init']);
+			expect('add_action')->toBeCalled()->once()->with('wp_head', [$this->useAtom, 'wpHead']);
 
-    describe('::init()', function() {
-        it('adds the default_feed filter correctly', function() {
-            allow('add_filter')->tobeCalled()->with('default_feed',[$this->useAtom, 'defaultFeed']);
-            allow('remove_action')->tobeCalled()->with('do_feed_rdf', 'do_feed_rdf', 10, 1);
-            allow('remove_action')->tobeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
-            allow('remove_action')->tobeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
+			$this->useAtom->register();
+		});
+	});
 
-            $this->useAtom->init();
-        });
+	describe('::init()', function () {
+		it('adds the default_feed filter correctly', function () {
+			allow('add_action')->toBeCalled();
+			expect('add_filter')->toBeCalled()->once()->with('default_feed', [$this->useAtom, 'defaultFeed']);
 
-    
+			allow('remove_action')->toBeCalled();
+			expect('remove_action')->toBeCalled()->times(3);
+			expect('remove_action')->toBeCalled()->with('do_feed_rdf', 'do_feed_rdf', 10, 1);
+			allow('remove_action')->toBeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
+			allow('remove_action')->toBeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
 
-        // Check that this code runs to completion without errors
-        it('completes execution without errors', function() {
-            expect(function () {
-                $this->useAtom->init();
-            })->not->toThrow();            
-        });
-    });
+			$this->useAtom->init();
+		});
 
-    describe('::wpHead()', function() {
-        it('outputs the correct link in wp_head', function() {
-            allow('get_bloginfo')->toBeCalled()->andReturn('Xyz');
-            allow('esc_attr')->toBeCalled()->andRun(function ($a) {
-                return '_'.$a.'_';
-            });
-            allow('get_feed_link')->toBeCalled()->with('atom')->andReturn('xyz');
 
-           
-            ob_start();
-            $results = $this->useAtom->wpHead();
-            $results = ob_get_clean();
 
-            expect($results)->toBeA('string');
-            expect(false)->toBeA('boolean');
-            expect($results)->toBe('        <link rel="alternate" type="application/atom+xml" title="_Xyz_ Feed" href="_xyz_">'."\n        ");
-        });
-    });
+		// Check that this code runs to completion without errors
+		it('completes execution without errors', function () {
+            allow('add_filter')->toBeCalled();
+            allow('remove_action')->toBeCalled();
+
+			expect(function () {
+				$this->useAtom->init();
+			})->not->toThrow();
+		});
+	});
+
+	describe('::wpHead()', function () {
+		it('outputs the correct link in wp_head', function () {
+			allow('get_bloginfo')->toBeCalled()->andReturn('Xyz');
+			expect('get_bloginfo')->toBeCalled()->once()->with('name');
+
+
+
+			allow('esc_attr')->toBeCalled()->andRun(function ($a) {
+				return '_'.$a.'_';
+			});
+			expect('esc_attr')->toBeCalled()->with('xyz');
+
+
+			allow('get_feed_link')->toBeCalled()->andReturn('xyz');
+			expect('get_feed_link')->toBeCalled()->once()->with('atom');
+
+
+			ob_start();
+			$this->useAtom->wpHead();
+			$results = ob_get_clean();
+
+			// expect($results)->toBeA('string');
+			// expect(false)->toBeA('boolean');
+			expect($results)->toBe('        <link rel="alternate" type="application/atom+xml" title="_Xyz_ Feed" href="_xyz_">'."\n        ");
+		});
+	});
 });
