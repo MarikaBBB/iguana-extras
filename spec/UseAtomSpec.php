@@ -15,8 +15,9 @@ describe('UseAtom', function() {
 
     describe("::register()", function() {
         it('should register actions correctly', function() {
-            \WP_Mock::expectActionAdded('init', [$this->useAtom, 'init']);
-            \WP_Mock::expectActionAdded('wp_head', [$this->useAtom, 'wpHead']);
+            allow('add_action')->tobeCalled()->with('init', [$this->useAtom, 'init']);
+            allow('add_action')->tobeCalled()->with('wp_head', [$this->useAtom, 'wpHead']);
+
     
             
             $this->useAtom->register();           
@@ -25,42 +26,15 @@ describe('UseAtom', function() {
 
     describe('::init()', function() {
         it('adds the default_feed filter correctly', function() {
-            \WP_Mock::expectFilterAdded('default_feed', [$this->useAtom, 'defaultFeed']);
+            allow('add_filter')->tobeCalled()->with('default_feed',[$this->useAtom, 'defaultFeed']);
+            allow('remove_action')->tobeCalled()->with('do_feed_rdf', 'do_feed_rdf', 10, 1);
+            allow('remove_action')->tobeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
+            allow('remove_action')->tobeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
 
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rdf', 'do_feed_rdf', 10, 1],
-                'times' => 1,
-            ]);
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rss', 'do_feed_rss', 10, 1],
-                'times' => 1,
-            ]);
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rss2', 'do_feed_rss2', 10, 1],
-                'times' => 1,
-            ]);
-
-            // Call init() method
             $this->useAtom->init();
         });
 
-        it("removes the actions", function() {
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rdf', 'do_feed_rdf', 10, 1],
-                'times' => 1,
-            ]);
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rss', 'do_feed_rss', 10, 1],
-                'times' => 1,
-            ]);
-            \WP_Mock::wpFunction('remove_action', [
-                'args' => ['do_feed_rss2', 'do_feed_rss2', 10, 1],
-                'times' => 1,
-            ]);
-
-            // Call init() method
-            $this->useAtom->init();
-        });
+    
 
         // Check that this code runs to completion without errors
         it('completes execution without errors', function() {
@@ -72,21 +46,11 @@ describe('UseAtom', function() {
 
     describe('::wpHead()', function() {
         it('outputs the correct link in wp_head', function() {
-            \WP_Mock::wpFunction('get_bloginfo', [
-                'args' => ['name'],
-                'return' => 'Xyz',
-            ]);
-    
-            \WP_Mock::wpFunction('esc_attr', [
-                'return' => function ($a) {
-                    return '_'.$a.'_';
-                },
-            ]);
-    
-            \WP_Mock::wpFunction('get_feed_link', [
-                'args' => ['atom'],
-                'return' => 'xyz',
-            ]);
+            allow('get_bloginfo')->toBeCalled()->andReturn('Xyz');
+            allow('esc_attr')->toBeCalled()->andRun(function ($a) {
+                return '_'.$a.'_';
+            });
+            allow('get_feed_link')->toBeCalled()->with('atom')->andReturn('xyz');
 
            
             ob_start();
