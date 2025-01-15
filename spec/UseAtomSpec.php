@@ -6,9 +6,7 @@ describe('UseAtom', function () {
 	// initialisation
 	beforeEach(function () {
 		$this->useAtom = new \Dxw\Iguana\Extras\UseAtom();
-
-        allow('add_filter')->toBeCalled();
-        allow('remove_action')->toBeCalled();
+        
         allow('add_action')->toBeCalled();
 	});
 
@@ -28,17 +26,20 @@ describe('UseAtom', function () {
 	});
 
 	describe('::init()', function () {
-		it('adds the default_feed filter correctly', function () {
-			allow('add_action')->toBeCalled();
-			expect('add_filter')->toBeCalled()->once()->with('default_feed', [$this->useAtom, 'defaultFeed']);
+		it('adds the default_feed filter and removes actions correctly', function () {
+			allow('add_filter')->toBeCalled();
+            allow('remove_action')->toBeCalled();
 
-			allow('remove_action')->toBeCalled();
+
+            // Assertions
+			expect('add_filter')->toBeCalled()->once()->with('default_feed', [$this->useAtom, 'defaultFeed']);
 			expect('remove_action')->toBeCalled()->times(3);
 			expect('remove_action')->toBeCalled()->with('do_feed_rdf', 'do_feed_rdf', 10, 1);
-			allow('remove_action')->toBeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
-			allow('remove_action')->toBeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
+			expect('remove_action')->toBeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
+			expect('remove_action')->toBeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
 
-			$this->useAtom->init();
+            $this->useAtom->init();
+			
 		});
 
 
@@ -75,8 +76,7 @@ describe('UseAtom', function () {
 			$this->useAtom->wpHead();
 			$results = ob_get_clean();
 
-			// expect($results)->toBeA('string');
-			// expect(false)->toBeA('boolean');
+
 			expect($results)->toBe('        <link rel="alternate" type="application/atom+xml" title="_Xyz_ Feed" href="_xyz_">'."\n        ");
 		});
 	});
