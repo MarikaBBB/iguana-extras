@@ -17,10 +17,8 @@ class UseAtom implements \Dxw\Iguana\Registerable
 	public function init()
 	{
 
-		error_log('calling add_filter for default_feed');
 		add_filter('default_feed', [$this, 'defaultFeed']);
 	
-        error_log('Calling remove_action for feeds');
 		remove_action('do_feed_rdf', 'do_feed_rdf', 10, 1);
 		remove_action('do_feed_rss', 'do_feed_rss', 10, 1);
 		remove_action('do_feed_rss2', 'do_feed_rss2', 10, 1);
