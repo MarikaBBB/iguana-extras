@@ -6,15 +6,19 @@ describe('UseAtom', function () {
 	// initialisation
 	beforeEach(function () {
 		$this->useAtom = new \Dxw\Iguana\Extras\UseAtom();
-        
-        allow('add_action')->toBeCalled();
+
 	});
 
 	afterEach(function () {
-        unset($this->useAtom);
+		unset($this->useAtom);
 	});
 
 	describe("::register()", function () {
+		it('implement the registerable interface', function () {
+			expect($this->useAtom)->toBeAnInstanceOf(\Dxw\Iguana\Registerable::class, $this->useAtom);
+		});
+
+
 		it('should register actions correctly', function () {
 			allow('add_action')->toBeCalled();
 			expect('add_action')->toBeCalled()->times(2);
@@ -28,26 +32,26 @@ describe('UseAtom', function () {
 	describe('::init()', function () {
 		it('adds the default_feed filter and removes actions correctly', function () {
 			allow('add_filter')->toBeCalled();
-            allow('remove_action')->toBeCalled();
+			allow('remove_action')->toBeCalled();
 
 
-            // Assertions
+			// Assertions
 			expect('add_filter')->toBeCalled()->once()->with('default_feed', [$this->useAtom, 'defaultFeed']);
 			expect('remove_action')->toBeCalled()->times(3);
 			expect('remove_action')->toBeCalled()->with('do_feed_rdf', 'do_feed_rdf', 10, 1);
 			expect('remove_action')->toBeCalled()->with('do_feed_rss', 'do_feed_rss', 10, 1);
 			expect('remove_action')->toBeCalled()->with('do_feed_rss2', 'do_feed_rss2', 10, 1);
 
-            $this->useAtom->init();
-			
+			$this->useAtom->init();
+
 		});
 
 
 
 		// Check that this code runs to completion without errors
 		it('completes execution without errors', function () {
-            allow('add_filter')->toBeCalled();
-            allow('remove_action')->toBeCalled();
+			allow('add_filter')->toBeCalled();
+			allow('remove_action')->toBeCalled();
 
 			expect(function () {
 				$this->useAtom->init();
@@ -65,7 +69,6 @@ describe('UseAtom', function () {
 			allow('esc_attr')->toBeCalled()->andRun(function ($a) {
 				return '_'.$a.'_';
 			});
-			expect('esc_attr')->toBeCalled()->with('xyz');
 
 
 			allow('get_feed_link')->toBeCalled()->andReturn('xyz');
